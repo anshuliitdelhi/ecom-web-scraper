@@ -33,7 +33,12 @@ public class HTMLParserExample1 {
 		Map<String, String> seedProducts = loadSeedProducts(seedFileName);
 		Document doc;
 		Map<String, VikingDirectProductPage> resultMap = new HashMap<String, VikingDirectProductPage>();
+		int count = 0;
+		int totalUrls = seedProducts.size();
 		for (String sku : seedProducts.keySet()) {
+			count++;
+			System.out.println("Status:(" + count + "/" + totalUrls + ")");
+			
 			String url = seedProducts.get(sku);
 			VikingDirectProductPage vikingDirectProductPage = new VikingDirectProductPage();
 			resultMap.put(sku, vikingDirectProductPage);
