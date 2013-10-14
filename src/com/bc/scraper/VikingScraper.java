@@ -219,7 +219,7 @@ public class VikingScraper {
 			row.createCell(5).setCellValue(vikingDirectProductPage.getListPrice());
 			row.createCell(6).setCellValue(vikingDirectProductPage.getBmsmQtyLast());
 			row.createCell(7).setCellValue(vikingDirectProductPage.getLastBmsmListPrice());
-			row.createCell(7).setCellValue(vikingDirectProductPage.getPromoListPrice());
+			row.createCell(8).setCellValue(vikingDirectProductPage.getPromoListPrice());
 		}
 
 		autoResizeColumns(mainSheet);
@@ -233,7 +233,7 @@ public class VikingScraper {
 	}
 
 	private static void autoResizeColumns(Sheet mainSheet) {
-		for (int i = 0; i < 8; i++) {
+		for (int i = 0; i < 9; i++) {
 			mainSheet.autoSizeColumn(i);
 		}
 	}
