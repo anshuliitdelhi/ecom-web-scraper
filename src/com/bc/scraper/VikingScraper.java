@@ -206,6 +206,7 @@ public class VikingScraper {
 		row.createCell(5).setCellValue("Online List Price Each (ex VAT)");
 		row.createCell(6).setCellValue("BMSM Qty last");
 		row.createCell(7).setCellValue("Online BMSM last tier Price Each (ex VAT)");
+		row.createCell(8).setCellValue("Promo Price");
 
 		for (String sku : cmData.keySet()) {
 			VikingDirectProductPage vikingDirectProductPage = cmData.get(sku);
@@ -218,6 +219,7 @@ public class VikingScraper {
 			row.createCell(5).setCellValue(vikingDirectProductPage.getListPrice());
 			row.createCell(6).setCellValue(vikingDirectProductPage.getBmsmQtyLast());
 			row.createCell(7).setCellValue(vikingDirectProductPage.getLastBmsmListPrice());
+			row.createCell(7).setCellValue(vikingDirectProductPage.getPromoListPrice());
 		}
 
 		autoResizeColumns(mainSheet);
