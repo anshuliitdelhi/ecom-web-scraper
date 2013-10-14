@@ -38,7 +38,7 @@ public class VikingScraper {
 		for (String sku : seedProducts.keySet()) {
 			count++;
 			System.out.println("Status:(" + count + "/" + totalUrls + ")");
-			
+
 			String url = seedProducts.get(sku);
 			VikingDirectProductPage vikingDirectProductPage = new VikingDirectProductPage();
 			resultMap.put(sku, vikingDirectProductPage);
@@ -63,26 +63,55 @@ public class VikingScraper {
 					vikingDirectProductPage.setListPrice(listPrice);
 				} catch (Exception e) {
 				}
+				String lastBmsmListPrice = null;
 				try {
-					Element p2 = doc.getElementById("priceNoTax1");
-					String lastBmsmListPrice = p2.text();
+					Element p3 = doc.getElementById("priceNoTax2");
+					lastBmsmListPrice = p3.text();
 					vikingDirectProductPage.setLastBmsmListPrice(lastBmsmListPrice);
 				} catch (Exception e) {
 				}
+				if (lastBmsmListPrice == null) {
+					try {
+						Element p2 = doc.getElementById("priceNoTax1");
+						lastBmsmListPrice = p2.text();
+						vikingDirectProductPage.setLastBmsmListPrice(lastBmsmListPrice);
+					} catch (Exception e) {
+					}
+				}
 				try {
 					Element q1 = doc.getElementById("priceQty0");
-					String qty1 = q1.text();
+					String[] qty1Array = q1.text().split("-");
+					String qty1 = qty1Array[0].trim();
 					vikingDirectProductPage.setQty1(qty1);
 				} catch (Exception e) {
 				}
+				String bmsmQtyLast = null;
 				try {
-					Element q2 = doc.getElementById("priceQty1");
-					String bmsmQtyLast = q2.text();
+					Element q3 = doc.getElementById("priceQty2");
+					bmsmQtyLast = extractMaxQty(q3.text());
 					vikingDirectProductPage.setBmsmQtyLast(bmsmQtyLast);
 				} catch (Exception e) {
 				}
+				if (bmsmQtyLast == null) {
+					try {
+						Element q2 = doc.getElementById("priceQty1");
+						bmsmQtyLast = extractMaxQty(q2.text());
+						vikingDirectProductPage.setBmsmQtyLast(bmsmQtyLast);
+					} catch (Exception e) {
+					}
+				}
+				try {
+					Elements specialOfferDiv = doc.getElementsByClass("dealBoxHeadingContent");
+					String heading = specialOfferDiv.text();
+					boolean promo = heading.equalsIgnoreCase("Offre Spéciale");
+					if(promo){
+						vikingDirectProductPage.setPromoListPrice(vikingDirectProductPage.getListPrice());
+					}
+
+				} catch (Exception e) {
+				}
 				vikingDirectProductPage.setUrl(url);
-				//System.out.println(vikingDirectProductPage);
+				// System.out.println(vikingDirectProductPage);
 			} catch (Exception e) {
 				// e.printStackTrace();
 			}
@@ -91,6 +120,25 @@ public class VikingScraper {
 		Date date = new Date();
 		String outputFileName = "viking_cm_data_" + dateFormat.format(date) + ".xlsx";
 		dumpVikingCMData(resultMap, outputFileName);
+	}
+
+	private static String extractMaxQty(String bmsmQtyLast) {
+		try {
+			String maxQty = null;
+			String[] temp = bmsmQtyLast.split("\\+");
+			maxQty = temp[0].trim();
+			if (isNumeric(maxQty))
+				return maxQty;
+			else {
+				temp = bmsmQtyLast.split("-");
+				maxQty = temp[1].trim();
+				return maxQty;
+			}
+		} catch (Exception e) {
+			// e.printStackTrace();
+		}
+		return null;
+
 	}
 
 	private static Map<String, String> loadSeedProducts(String seedFileName) throws Exception {
@@ -159,7 +207,7 @@ public class VikingScraper {
 		row.createCell(6).setCellValue("BMSM Qty last");
 		row.createCell(7).setCellValue("Online BMSM last tier Price Each (ex VAT)");
 
-		for (String sku: cmData.keySet()) {
+		for (String sku : cmData.keySet()) {
 			VikingDirectProductPage vikingDirectProductPage = cmData.get(sku);
 			row = mainSheet.createRow(rowCount++);
 			row.createCell(0).setCellValue(sku);
@@ -181,10 +229,19 @@ public class VikingScraper {
 	private static XSSFWorkbook readFile(String filename) throws IOException {
 		return new XSSFWorkbook(new FileInputStream(filename));
 	}
-	
+
 	private static void autoResizeColumns(Sheet mainSheet) {
 		for (int i = 0; i < 8; i++) {
 			mainSheet.autoSizeColumn(i);
 		}
+	}
+
+	private static boolean isNumeric(String str) {
+		try {
+			Double.parseDouble(str);
+		} catch (NumberFormatException nfe) {
+			return false;
+		}
+		return true;
 	}
 }
